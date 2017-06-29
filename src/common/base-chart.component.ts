@@ -1,9 +1,10 @@
 import {
   ElementRef, NgZone, ChangeDetectorRef, Component, Input,
-  Output, EventEmitter, AfterViewInit, OnDestroy, OnChanges, SimpleChanges
+  Output, EventEmitter, AfterViewInit, OnDestroy, OnChanges, SimpleChanges,
+  PLATFORM_ID, Inject
 } from '@angular/core';
 
-import { LocationStrategy } from '@angular/common';
+import { LocationStrategy, isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/debounceTime';
@@ -32,7 +33,8 @@ export class BaseChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     protected chartElement: ElementRef,
     protected zone: NgZone,
     protected cd: ChangeDetectorRef,
-    protected location: LocationStrategy) {
+    protected location: LocationStrategy,
+    @Inject(PLATFORM_ID) protected platformId: Object) {
   }
 
   ngAfterViewInit(): void {
@@ -137,14 +139,16 @@ export class BaseChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   private bindWindowResizeEvent(): void {
-    const source = Observable.fromEvent(window, 'resize', null, null);
-    const subscription = source.debounceTime(200).subscribe(e => {
-      this.update();
-      if (this.cd) {
-        this.cd.markForCheck();
-      }
-    });
-    this.resizeSubscription = subscription;
+    if (isPlatformBrowser(this.platformId)) {
+      const source = Observable.fromEvent(window, 'resize', null, null);
+      const subscription = source.debounceTime(200).subscribe(e => {
+        this.update();
+        if (this.cd) {
+          this.cd.markForCheck();
+        }
+      });
+      this.resizeSubscription = subscription;
+    }
   }
 
   /**
@@ -176,7 +180,7 @@ export class BaseChartComponent implements OnChanges, AfterViewInit, OnDestroy {
         }
       }
 
-      if(item['extra'] !== undefined) {
+      if (item['extra'] !== undefined) {
         copy['extra'] = JSON.parse(JSON.stringify(item['extra']));
       }
 

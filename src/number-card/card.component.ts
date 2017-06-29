@@ -1,7 +1,9 @@
+import { isPlatformServer } from '@angular/common';
 import {
   Component, Input, Output, EventEmitter, ElementRef,
   SimpleChanges, OnChanges, ViewChild, ChangeDetectionStrategy,
-  ChangeDetectorRef, NgZone, OnDestroy, ViewEncapsulation
+  ChangeDetectorRef, NgZone, OnDestroy, ViewEncapsulation, 
+  Inject, PLATFORM_ID,
 } from '@angular/core';
 import { trimLabel } from '../common/trim-label.helper';
 import { roundedRect } from '../common/shape.helper';
@@ -98,7 +100,8 @@ export class CardComponent implements OnChanges, OnDestroy {
 
   bandPath: string;
 
-  constructor(element: ElementRef, private cd: ChangeDetectorRef, private zone: NgZone) {
+  constructor(element: ElementRef, private cd: ChangeDetectorRef, private zone: NgZone,
+    @Inject(PLATFORM_ID) protected platformId: Object) {
     this.element = element.nativeElement;
   }
 
@@ -165,10 +168,10 @@ export class CardComponent implements OnChanges, OnDestroy {
       const decs = decimalChecker(val);
       const valueFormatting = this.valueFormatting || (card => card.value.toLocaleString());
 
-      const callback = ({value, finished}) => {
+      const callback = ({ value, finished }) => {
         this.zone.run(() => {
           value = finished ? val : value;
-          this.value = valueFormatting({label: this.label, data: this.data, value});
+          this.value = valueFormatting({ label: this.label, data: this.data, value });
           if (!finished) {
             this.value = this.paddedValue(this.value);
           }
@@ -183,6 +186,9 @@ export class CardComponent implements OnChanges, OnDestroy {
 
   scaleText(): void {
     this.zone.run(() => {
+      if (isPlatformServer(this.platformId)) {
+        return;
+      }
       const { width, height } = this.textEl.nativeElement.getBoundingClientRect();
       if (width === 0 || height === 0) {
         return;

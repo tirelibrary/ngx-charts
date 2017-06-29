@@ -1,15 +1,18 @@
+import { isPlatformServer } from '@angular/common';
 import {
-  Component,
-  Input,
-  ElementRef,
-  ViewChild,
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  Output,
-  EventEmitter,
-  ViewEncapsulation,
-  ContentChild,
-  TemplateRef
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    ContentChild,
+    ElementRef,
+    EventEmitter,
+    Inject,
+    Input,
+    Output,
+    PLATFORM_ID,
+    TemplateRef,
+    ViewChild,
+    ViewEncapsulation,
 } from '@angular/core';
 import { scaleLinear } from 'd3-scale';
 
@@ -170,8 +173,8 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
     const xOffset = this.margin[3] + this.dims.width / 2;
     const yOffset = this.margin[0] + this.dims.height / 2;
 
-    this.transform = `translate(${ xOffset }, ${ yOffset })`;
-    this.rotation = `rotate(${ this.startAngle })`;
+    this.transform = `translate(${xOffset}, ${yOffset})`;
+    this.rotation = `rotate(${this.startAngle})`;
     setTimeout(() => this.scaleText(), 50);
   }
 
@@ -256,7 +259,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   getDisplayValue(): string {
     const value = this.results.map(d => d.value).reduce((a, b) => a + b, 0);
 
-    if(this.textValue && 0 !== this.textValue.length) {
+    if (this.textValue && 0 !== this.textValue.length) {
       return this.textValue.toLocaleString();
     }
 
@@ -268,6 +271,12 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   }
 
   scaleText(repeat: boolean = true): void {
+
+    if (isPlatformServer(this.platformId)) {
+      this.resizeScale = 1;
+      return;
+    }
+
     const { width } = this.textEl.nativeElement.getBoundingClientRect();
     const oldScale = this.resizeScale;
 
@@ -312,7 +321,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
       return;
     }
 
-    this.activeEntries = [ item, ...this.activeEntries ];
+    this.activeEntries = [item, ...this.activeEntries];
     this.activate.emit({ value: item, entries: this.activeEntries });
   }
 
@@ -328,7 +337,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   }
 
   isActive(entry): boolean {
-    if(!this.activeEntries) return false;
+    if (!this.activeEntries) return false;
     const item = this.activeEntries.find(d => {
       return entry.name === d.name && entry.series === d.series;
     });
