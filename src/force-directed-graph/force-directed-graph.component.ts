@@ -25,6 +25,11 @@ import { BaseChartComponent } from '../common/base-chart.component';
 import { calculateViewDimensions, ViewDimensions } from '../common/view-dimensions.helper';
 import { ColorHelper } from '../common/color.helper';
 
+// tslint:disable-next-line:variable-name
+declare const global: any;
+// tslint:disable-next-line:variable-name
+const MouseEvent = (global as any).MouseEvent as MouseEvent;
+
 @Component({
   selector: 'ngx-charts-force-directed-graph',
   template: `
@@ -134,9 +139,9 @@ export class ForceDirectedGraphComponent extends BaseChartComponent {
     this.legendOptions = this.getLegendOptions();
 
     this.transform = `
-      translate(${ this.dims.xOffset + this.dims.width / 2 }, ${ this.margin[0] + this.dims.height / 2 })
+      translate(${ this.dims.xOffset + this.dims.width / 2}, ${this.margin[0] + this.dims.height / 2})
     `;
-    if(this.force) {
+    if (this.force) {
       this.force.nodes(this.nodes)
         .force('link', this.forceLink.links(this.links))
         .alpha(0.5).restart();
@@ -148,8 +153,8 @@ export class ForceDirectedGraphComponent extends BaseChartComponent {
   }
 
   onActivate(event): void {
-    if(this.activeEntries.indexOf(event) > -1) return;
-    this.activeEntries = [ event, ...this.activeEntries ];
+    if (this.activeEntries.indexOf(event) > -1) return;
+    this.activeEntries = [event, ...this.activeEntries];
     this.activate.emit({ value: event, entries: this.activeEntries });
   }
 

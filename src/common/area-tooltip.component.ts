@@ -17,6 +17,12 @@ import {
   animate,
   transition
 } from '@angular/animations';
+
+// tslint:disable-next-line:variable-name
+declare const global: any;
+// tslint:disable-next-line:variable-name
+const MouseEvent = (global as any).MouseEvent as MouseEvent;
+
 @Component({
   selector: 'g[ngx-charts-area-tooltip]',
   template: `
@@ -30,8 +36,8 @@ import {
         [attr.width]="tooltipArea.width"
         [attr.height]="height"
         style="opacity: 0; cursor: 'auto';"
-        (mouseenter)="showTooltip(i)"
-        (mouseleave)="hideTooltip(i)"
+        (mouseenter)="showTooltip(i, $event)"
+        (mouseleave)="hideTooltip(i, $event)"
       />
       <xhtml:ng-template #defaultTooltipTemplate let-model="model">
         <xhtml:div class="area-tooltip-container">
@@ -72,13 +78,13 @@ import {
         style({
           opacity: 0,
         }),
-        animate(250, style({opacity: 0.7}))
+        animate(250, style({ opacity: 0.7 }))
       ]),
       transition('active => inactive', [
         style({
           opacity: 0.7,
         }),
-        animate(250, style({opacity: 0}))
+        animate(250, style({ opacity: 0 }))
       ])
     ])
   ]
@@ -209,17 +215,17 @@ export class AreaTooltip implements OnChanges {
     return results;
   }
 
-  showTooltip(index): void {
+  showTooltip(index, event: MouseEvent): void {
     const tooltipAnchor = this.tooltips.toArray()[index].nativeElement.getElementsByTagName('rect')[1];
-    const event = new MouseEvent('mouseenter', {bubbles: false});
+    // const event = new MouseEvent('mouseenter', {bubbles: false});
     this.renderer.invokeElementMethod(tooltipAnchor, 'dispatchEvent', [event]);
     this.anchorOpacity[index] = 0.7;
     this.hover.emit(this.tooltipAreas[index]);
   }
 
-  hideTooltip(index): void {
+  hideTooltip(index, event: MouseEvent): void {
     const tooltipAnchor = this.tooltips.toArray()[index].nativeElement.getElementsByTagName('rect')[1];
-    const event = new MouseEvent('mouseleave', {bubbles: false});
+    // const event = new MouseEvent('mouseleave', {bubbles: false});
     this.renderer.invokeElementMethod(tooltipAnchor, 'dispatchEvent', [event]);
     this.anchorOpacity[index] = 0;
   }
